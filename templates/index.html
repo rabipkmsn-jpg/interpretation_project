@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Notes Disease Prediction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 35px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .cta-button {
+            background: white;
+            color: #667eea;
+            padding: 12px 28px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .floating-icon {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .icon1 { top: 15%; left: 10%; animation-delay: 0s; }
+        .icon2 { top: 25%; right: 12%; animation-delay: 0.5s; }
+        .icon3 { top: 50%; left: 8%; animation-delay: 1s; }
+        .icon4 { top: 60%; right: 10%; animation-delay: 1.5s; }
+        .icon5 { bottom: 15%; left: 15%; animation-delay: 2s; }
+        .icon6 { bottom: 20%; right: 15%; animation-delay: 2.5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-section {
+            text-align: center;
+            max-width: 800px;
+            margin-bottom: 50px;
+            position: relative;
+            z-index: 5;
+        }
+
+        h1 {
+            font-size: 52px;
+            color: white;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0.8));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .upload-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 700px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 15px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            font-size: 14px;
+            color: #666;
+            z-index: 10;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-selected {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f4ff;
+            border-radius: 10px;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        button[type="submit"]:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            margin: 30px auto;
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            margin-top: 30px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h3 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-row {
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 15px;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 700;
+            color: #667eea;
+            min-width: 180px;
+            font-size: 15px;
+        }
+
+        .result-value {
+            color: #333;
+            flex: 1;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            padding: 20px;
+            background: #ffe6e6;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 20px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            h1 {
+                font-size: 36px;
+            }
+
+            .upload-container {
+                padding: 30px 20px;
+            }
+
+            .floating-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">🏥</div>
+            <span>MedPredict</span>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <!-- Floating Icons -->
+        <div class="floating-icon icon1">💊</div>
+        <div class="floating-icon icon2">🩺</div>
+        <div class="floating-icon icon3">📋</div>
+        <div class="floating-icon icon4">🧬</div>
+        <div class="floating-icon icon5">💉</div>
+        <div class="floating-icon icon6">🔬</div>
+
+        <div class="hero-section">
+            <h1>Where your <span class="highlight">clinical data</span> turns into <span class="highlight">insights</span> instantly</h1>
+            <p class="subtitle">Upload clinical notes and get accurate disease predictions with recommended treatments. From upload to diagnosis in seconds.</p>
+        </div>
+
+        <div class="upload-container">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Click to upload clinical notes</div>
+                    <div class="upload-subtext">Supports .txt and .pdf files</div>
+                    <input type="file" name="file" id="fileInput" accept=".txt,.pdf" required>
+                </div>
+                <div id="fileSelected" class="file-selected" style="display:none;"></div>
+                <button type="submit" id="submit-btn">Analyze Clinical Notes</button>
+            </form>
+            
+            <div id="spinner" class="spinner" style="display:none;"></div>
+            <div id="result" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById("uploadForm");
+        const fileInput = document.getElementById("fileInput");
+        const uploadArea = document.getElementById("uploadArea");
+        const fileSelected = document.getElementById("fileSelected");
+        const spinner = document.getElementById("spinner");
+        const resultDiv = document.getElementById("result");
+        const submitBtn = document.getElementById("submit-btn");
+
+        uploadArea.onclick = () => fileInput.click();
+
+        fileInput.onchange = () => {
+            if (fileInput.files.length > 0) {
+                fileSelected.textContent = `✓ ${fileInput.files[0].name}`;
+                fileSelected.style.display = "block";
+            }
+        };
+
+        form.onsubmit = async (event) => {
+            event.preventDefault();
+            spinner.style.display = "block";
+            resultDiv.innerHTML = "";
+            resultDiv.style.display = "none";
+            submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData(form);
+                const response = await fetch('/predict/', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error("Error in fetching the prediction.");
+                }
+
+                const data = await response.json();
+                spinner.style.display = "none";
+
+                resultDiv.innerHTML = `
+                    <h3>📊 Patient Clinical Report</h3>
+                    <div class="result-card">
+                        <div class="result-row">
+                            <div class="result-label">Predicted Disease:</div>
+                            <div class="result-value">${data.predicted_disease}</div>
+                        </div>
+                        <div class="result-row">
+                            <div class="result-label">Description:</div>
+                            <div class="result-value">${data.description}</div>
+                        </div>
+                        <div class="result-row">
+                            <div class="result-label">Recommended Medicines:</div>
+                            <div class="result-value">${data.medicines.join(", ")}</div>
+                        </div>
+                        <div class="result-row">
+                            <div class="result-label">Specialists:</div>
+                            <div class="result-value">${data.specialists.join(", ")}</div>
+                        </div>
+                    </div>
+                `;
+                resultDiv.style.display = "block";
+            } catch (error) {
+                spinner.style.display = "none";
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+                resultDiv.style.display = "block";
+            } finally {
+                submitBtn.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>
