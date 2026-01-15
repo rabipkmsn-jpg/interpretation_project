@@ -5,9 +5,19 @@ With the rapid growth of electronic health records (EHRs), a large amount of uns
 
 ---
 
-## Project Description
-This project implements a **BERT-based multi-class classification system** to predict medical diagnoses from clinical notes. The system processes raw patient records, cleans and tokenizes the text, and trains a BERT model from scratch to learn contextual representations. The trained model can then predict the most likely diagnosis for unseen patient records.
+## 📝 Project Description
+This project implements a high-performance **Medical Diagnosis Prediction System** powered by a **custom BERT architecture**. Unlike typical solutions, this model was **initialized and trained from scratch** specifically to master the complex vocabulary of clinical medical records.
 
+**Key Features:**
+* **Custom-Trained BERT:** Built from the ground up to capture nuanced medical context.
+* **FastAPI Backend:** Provides a robust and fast API for real-time inference.
+* **Multi-Format Support:** Seamlessly processes patient records in both **PDF** and **TXT** formats.
+* **Comprehensive Output:** Delivers the most likely diagnosis along with:
+    * Confidence Scores 📊
+    * Detailed Disease Descriptions 📖
+    * Recommended Medications 💊
+    * Specialist Referrals 👨‍⚕️
+    
 The complete pipeline includes:
 - Data preprocessing and cleaning
 - Custom tokenizer training
