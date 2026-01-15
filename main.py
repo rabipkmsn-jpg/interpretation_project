@@ -1,13 +1,11 @@
-#install these before running the application
-# pip install fastapi uvicorn torch transformers PyPDF2 aiofiles scikit-learn nltk python-multipart
 
-#run the application with Uvicorn and the commend below
-#uvicorn main:app --reload
+# Run the application with Uvicorn using the command below
+# uvicorn main:app --reload
 
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
-from transformers import BertForSequenceClassification, BertTokenizer
+from transformers import BertForSequenceClassification, BertTokenizer, BertConfig
 import torch
 import PyPDF2
 from io import BytesIO
@@ -16,16 +14,55 @@ from fastapi import Request
 import numpy as np
 import re
 from nltk.corpus import stopwords
-
 import nltk
-nltk.download('stopwords')
+import os
 
-model = BertForSequenceClassification.from_pretrained('./patient_model')
+# Download stopwords if not already downloaded
+nltk.download('stopwords', quiet=True)
+
+# ==================== IMPORTANT CHANGES FOR NON-PRETRAINED BERT ====================
+
+# Load the custom tokenizer you trained from scratch
 tokenizer = BertTokenizer.from_pretrained('./patient_model')
+
+# IMPORTANT: When loading the model, you need to load the configuration first
+# or ensure the model architecture matches what was trained
+
+# Option 1: If you have a config.json in your patient_model folder
+model = BertForSequenceClassification.from_pretrained('./patient_model')
+
+# Option 2: If you need to specify custom config (use if Option 1 fails)
+# config_path = "./patient_model/config.json"
+# if os.path.exists(config_path):
+#     model = BertForSequenceClassification.from_pretrained('./patient_model')
+# else:
+#     # Create config matching your training
+#     config = BertConfig(
+#         vocab_size=tokenizer.vocab_size,
+#         hidden_size=768,
+#         num_hidden_layers=12,
+#         num_attention_heads=12,
+#         intermediate_size=3072,
+#         hidden_act="gelu",
+#         hidden_dropout_prob=0.1,
+#         attention_probs_dropout_prob=0.1,
+#         max_position_embeddings=512,
+#         type_vocab_size=2,
+#         initializer_range=0.02,
+#         layer_norm_eps=1e-12,
+#         pad_token_id=0,
+#         num_labels=20  # Adjust based on your number of classes
+#     )
+#     model = BertForSequenceClassification(config)
+#     # Load the trained weights
+#     model.load_state_dict(torch.load('./patient_model/pytorch_model.bin'))
+
+# Load label encoder
 label_encoder = pickle.load(open("label_encoder.pkl", 'rb'))
 
-app = FastAPI()
+# ==================== REST OF THE CODE (mostly unchanged) ====================
 
+app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 diseaseList = {
@@ -138,20 +175,37 @@ def textCleaning(text):
 def predictTheDisease(patient_record, model, tokenizer, label_encoder):
     patient_record = textCleaning(patient_record)
     inputs = tokenizer(patient_record, return_tensors="pt", padding=True, truncation=True, max_length=512)
+    
+    # Set model to evaluation mode
+    model.eval()
+    
     with torch.no_grad():
         outputs = model(**inputs)
         logits = outputs.logits
+    
     predicted_label = torch.argmax(logits, dim=1).item()
     predicted_disease = label_encoder.inverse_transform([predicted_label])[0]
-    return predicted_disease
+    
+    # Get prediction probabilities
+    probabilities = torch.nn.functional.softmax(logits, dim=1)
+    confidence = probabilities[0][predicted_label].item()
+    
+    return predicted_disease, confidence
 
 @app.get("/", response_class=HTMLResponse)
 async def upload_form(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 def get_disease_details(disease_name):
+    # Handle variations in disease names
     if disease_name in diseaseList:
         return diseaseList[disease_name]
+    
+    # Try to match with close names
+    for key in diseaseList.keys():
+        if disease_name.lower() in key.lower() or key.lower() in disease_name.lower():
+            return diseaseList[key]
+    
     return {
         "description": "No details available for this disease.",
         "medicines": [],
@@ -160,21 +214,50 @@ def get_disease_details(disease_name):
 
 @app.post("/predict/")
 async def predict(file: UploadFile = File(...)):
-    content = await file.read()
-    text = ""
-    if file.filename.endswith(".pdf"):
-        pdf_reader = PyPDF2.PdfReader(BytesIO(content))
-        for page in pdf_reader.pages:
-            text += page.extract_text()
-    elif file.filename.endswith(".txt"):
-        text = content.decode("utf-8")
+    try:
+        content = await file.read()
+        text = ""
+        
+        if file.filename.endswith(".pdf"):
+            pdf_reader = PyPDF2.PdfReader(BytesIO(content))
+            for page in pdf_reader.pages:
+                text += page.extract_text()
+        elif file.filename.endswith(".txt"):
+            text = content.decode("utf-8")
+        else:
+            return JSONResponse(
+                content={"error": "Unsupported file format. Please upload PDF or TXT."},
+                status_code=400
+            )
+        
+        if not text.strip():
+            return JSONResponse(
+                content={"error": "The uploaded file appears to be empty or couldn't be read."},
+                status_code=400
+            )
+        
+        predicted_disease, confidence = predictTheDisease(text, model, tokenizer, label_encoder)
+        disease_details = get_disease_details(predicted_disease)
+        
+        return JSONResponse(content={
+            "predicted_disease": predicted_disease,
+            "confidence": f"{confidence:.2%}",
+            "description": disease_details["description"],
+            "medicines": disease_details["medicines"],
+            "specialists": disease_details["specialists"]
+        })
+        
+    except Exception as e:
+        return JSONResponse(
+            content={"error": f"An error occurred: {str(e)}"},
+            status_code=500
+        )
 
-    predicted_disease = predictTheDisease(text, model, tokenizer, label_encoder)
-    disease_details = get_disease_details(predicted_disease)
-    return JSONResponse(content={
-        "predicted_disease": predicted_disease,
-        "description": disease_details["description"],
-        "medicines": disease_details["medicines"],
-        "specialists": disease_details["specialists"]
-    })
+# Add a health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "model_loaded": True}
 
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
