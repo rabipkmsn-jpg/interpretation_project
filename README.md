@@ -1,71 +1,98 @@
-# 🏥 MEDPREDICT
-### Diagnosis Prediction from Clinical Notes using BERT 🧬
+# 🩺 Clinical Diagnosis Prediction from Patient Records using BERT
 
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org/)
-[![Hugging Face](https://img.shields.io/badge/🤗%20Transformers-Hugging%20Face-yellow?style=for-the-badge)](https://huggingface.co/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
-
-> **A state-of-the-art AI tool that leverages Deep Learning to analyze clinical notes and predict potential medical diagnoses.**
+## Introduction
+With the rapid growth of electronic health records (EHRs), a large amount of unstructured clinical text is generated daily. Extracting meaningful insights from these records can assist healthcare professionals in decision-making. This project focuses on leveraging Natural Language Processing (NLP) and deep learning techniques to predict possible medical diagnoses from patient clinical notes.
 
 ---
 
-## 🩺 Overview
-**MedPredict** implements a powerful **BERT-based model** (`bert-base-cased`) fine-tuned for multi-class classification. By processing unstructured clinical notes and patient histories, it provides predictive insights to assist medical professionals.
+## Project Description
+This project implements a **BERT-based multi-class classification system** to predict medical diagnoses from clinical notes. The system processes raw patient records, cleans and tokenizes the text, and trains a BERT model from scratch to learn contextual representations. The trained model can then predict the most likely diagnosis for unseen patient records.
+
+The complete pipeline includes:
+- Data preprocessing and cleaning
+- Custom tokenizer training
+- Model training and evaluation
+- Model saving and deployment for inference
 
 ---
 
-## ✨ Key Features
-
-* **🧹 Data Cleaning & Preprocessing**
-    * *Sanitizes complex medical text for optimal analysis.*
-* **🧩 Smart Tokenization**
-    * *Utilizes `BertTokenizer` to convert clinical text into machine-readable formats.*
-* **🧠 BERT Fine-Tuning**
-    * *Adapts the pre-trained BERT architecture specifically for multi-class diagnosis.*
-* **📊 Performance Evaluation**
-    * *Detailed metrics including Confusion Matrices and Classification Reports.*
-* **💾 Model Deployment**
-    * *Saves trained models for seamless integration with FastAPI.*
+## Objective
+The main objectives of this project are:
+- To preprocess and normalize unstructured clinical notes
+- To convert clinical text into model-readable token sequences
+- To train a BERT-based model to predict patient diagnoses
+- To evaluate the model using standard classification metrics
+- To build a reusable prediction pipeline for real-world inference
 
 ---
 
-## 📉 Evaluation Metrics
-We ensure reliability through rigorous testing:
-* **Confusion Matrix** 🏳️ — *Visualizes true vs. predicted classifications.*
-* **Classification Report** 📋 — *Assess Precision, Recall, and F1-Scores.*
+## Workflow
+1. **Prepare and Clean the Data**
+   - Lowercasing text
+   - Removing numbers, punctuation, and stopwords
+2. **Tokenization**
+   - Train a custom WordPiece tokenizer on clinical notes
+3. **Model Training**
+   - Train a BERT model from scratch for diagnosis prediction
+4. **Model Evaluation**
+   - Confusion Matrix
+   - Classification Report
+   - Accuracy and F1 Score
+5. **Deployment**
+   - Save trained model, tokenizer, and label encoder
+   - Build a prediction function for new patient records
 
 ---
 
-## 🚀 How to Run
-
-Follow these steps to get MedPredict up and running on your local machine.
-1. 📥 **Clone the repository:**  
-   ```bash
-   git clone https://github.com/aykaimran/MedPredict.git
-   cd MedPredict
-2. 🏋️‍♀️ Train and Save the Model:
-   - Open the MedPredict.ipynb notebook.
-   - Run the cells to train the model and save it locally.
-3. 📂 Add the Pre-trained Model:
-   - Download the saved model files.
-   - Place them inside the MedPredict folder.
-4. 📦 Install Dependencies:
-   - Install the required Python packages listed at the top of main.py.
-    ```bash
-    pip install fastapi uvicorn torch transformers PyPDF2 aiofiles scikit-learn nltk python-multipart
-5. ⚡ Run the Prediction Script:
-   - Execute main.py using the instructions provided at the top of the file.
-   ```bash
-   uvicorn main:app --reload
+## Tech Stack
+- **Programming Language:** Python  
+- **Libraries & Frameworks:**
+  - PyTorch
+  - Hugging Face Transformers
+  - Tokenizers
+  - Scikit-learn
+  - Pandas & NumPy
+  - NLTK
+  - Matplotlib & Seaborn
+- **Model Architecture:** BERT (Transformer-based)
+- **Hardware Support:** GPU (CUDA) with mixed precision (FP16)
 
 ---
 
-## 👩‍⚕️ Contributors
-The team behind MedPredict:
-- [Vaniya Ijaz](https://github.com/VE-Vaniya)
-- [Ayka Imran](https://github.com/aykaimran)
-- [Maryam Irshad](https://github.com/maryamirshad04)
-- [Walija Fatima](https://github.com/Jee-core)
+## Blockers / Hurdles Faced
+- **Training BERT from Scratch:**  
+  Training without pretrained weights required careful tuning of learning rate, warmup steps, and epochs.
+- **Data Leakage Risk:**  
+  Ensuring that diagnosis labels did not trivially appear in clinical notes required strict preprocessing.
+- **Class Imbalance:**  
+  Some diagnoses appeared less frequently, affecting prediction performance.
+- **High Computational Cost:**  
+  Long sequences and large model size required gradient checkpointing and mixed precision training.
 
-<p align="center"> <sub>Built with ❤️ and ☕ by the MedPredict Team</sub> </p>
+---
+
+## Achievements
+- Successfully built a complete end-to-end NLP pipeline for clinical diagnosis prediction
+- Trained a BERT-based classifier capable of handling long clinical notes
+- Achieved meaningful performance evaluated through accuracy, F1 score, and confusion matrix
+- Implemented a reusable inference pipeline for real-time predictions
+- Saved and packaged the trained model for deployment
+
+---
+
+## Future Scope
+- Fine-tuning pretrained clinical language models (e.g., BioBERT, ClinicalBERT)
+- Incorporating attention-based explanation techniques for interpretability
+- Expanding the dataset to include more diagnoses
+- Deploying the model as a web or API-based service
+- Integrating confidence scores for safer medical decision support
+
+---
+
+## Sample Prediction
+```text
+Input:
+yearold male presents heartburn regurgitation sour taste mouth especially meals patient selfmedicating overthecounter antacids symptoms persist hour ph monitoring test confirms diagnosis gerd patient started ppi advised avoid trigger foods
+
+Output:
+Predicted Disease: Gastroesophageal Reflux Disease
