@@ -1,1 +1,17 @@
 patient_model/
+# Python environment and cache
+__pycache__/
+*.pyc
+.env
+venv/
+
+# Large Model Files (Do not push these to Git usually)
+patient_model/model.safetensors
+*.bin
+*.pkl
+
+# OS files
+.DS_Store
+Thumbs.db
+# Data folder (contains datasets/raw files)
+data/
