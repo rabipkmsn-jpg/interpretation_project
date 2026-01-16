@@ -138,7 +138,7 @@ diseaseList = {
         "specialists": ["Hepatologist", "Gastroenterologist", "Nutritionist"]
     },
     "Acute Renal Failure": {
-        "description": "A sudden loss of kidney function.",
+        "description": "A sudden loss of kidney function or may failiour.",
         "medicines": ["Diuretics", "Dopamine", "Calcium Gluconate", "Sodium Bicarbonate", "Epoetin"],
         "specialists": ["Nephrologist", "Critical Care Specialist", "Internal Medicine Specialist"]
     },
