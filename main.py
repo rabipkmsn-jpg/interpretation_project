@@ -24,6 +24,7 @@ nltk.download('stopwords', quiet=True)
 
 # Load the custom tokenizer you trained from scratch
 tokenizer = BertTokenizer.from_pretrained('./patient_model')
+# Optimizing padding and truncation for clinical sequences
 
 # IMPORTANT: When loading the model, you need to load the configuration first
 # or ensure the model architecture matches what was trained
