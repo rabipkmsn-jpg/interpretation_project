@@ -106,3 +106,11 @@ yearold male presents heartburn regurgitation sour taste mouth especially meals 
 
 Output:
 Predicted Disease: Gastroesophageal Reflux Disease
+
+## 🚀 How to Run the Project
+
+1. **Install Dependencies:**
+   ```bash
+   pip install -r requirements.txt
+ Run in terminal:
+py -m uvicorn main:app --reload
